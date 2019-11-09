@@ -1,0 +1,9 @@
+dag_name: dag1
+dag_tasks:
+  - task_name: task1
+    task_path: task1.sql
+    task_dependencies:
+  - task_name: task2
+    task_path: task2.sql
+    task_dependencies: task1
+dag_schedule: 0 0 * * *
