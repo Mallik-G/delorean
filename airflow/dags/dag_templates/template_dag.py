@@ -26,6 +26,11 @@ def create_task(task_name, dag):
             bash_command='date',
             dag=dag)
 
+def create_dependencies(task_name, dependencies, tasks):
+    for dependencie in dependencies:
+        tasks[task_name].set_upstream(tasks[dependencie])
+
+
 def run_template():
     yaml_path = "/usr/local/airflow/config/"
     for yaml_file in os.listdir(yaml_path):
@@ -34,10 +39,12 @@ def run_template():
             args = create_default_args()
             dag = create_dag(conf_list["dag_name"], args, conf_list["dag_schedule"])
             with dag:
-                task_list = []
+                tasks = dict()
                 for task in conf_list["dag_tasks"]:
-                    task_list.append(create_task(task["task_name"], dag))
-                task_list[0] >> task_list[1]
+                    tasks[task["task_name"]] = create_task(task["task_name"], dag)
+                    if "task_dependencies" in task:
+                        create_dependencies(task["task_name"], task["task_dependencies"], tasks)
+                
                 globals()[uuid.uuid1()] = dag
 
 run_template()
